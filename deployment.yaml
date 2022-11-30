@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: kali
+    labels:
+      app: kali
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: devopslab
+    template:
+        metadata:
+            labels:
+                app: devopslab
+        spec:
+            containers:
+                - name: devopslab
+                  image: oonray/kali:1.0.2
+                  tty: true
+                  stdin: true
+                  command: ["/bin/sh"]
