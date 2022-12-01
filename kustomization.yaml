@@ -3,5 +3,4 @@ kind: Kustomization
 namespace: DevOpsLab
 resources:
   - deployment.yaml
-  - secrets.dec.yaml
   - service.yaml

@@ -1,22 +1,36 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-    name: kali
+    name: DevOps
     labels:
-      app: kali
+      app: DevOps
 spec:
     replicas: 1
     selector:
         matchLabels:
-            app: devopslab
+            app: DevOps
     template:
         metadata:
             labels:
-                app: devopslab
+                app: DevOps
         spec:
+            volumes:
+                - name: gitlabhome
+                  hostPath:
+                    path: /disk1/gitlab
             containers:
-                - name: devopslab
-                  image: oonray/kali:1.0.2
+                - name: gitlab
+                  hostname: gilab.internal.home
+                  image: gitlab/gitlab-ee:latest
                   tty: true
                   stdin: true
-                  command: ["/bin/sh"]
+                  env:
+                    - name: GITLAB_HOME
+                      value: /srv/gitlab
+                  volumeMounts:
+                    - mountPath: /srv/gitlab
+                      name: gitlabhome
+                  port:
+                     - containerPort: 80
+                     - containerPort: 22
+                     - containerPort: 443
