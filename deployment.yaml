@@ -14,13 +14,13 @@ spec:
             labels:
                 app: DevOps
         spec:
+            hostname: gitlab.internal.home
             volumes:
                 - name: gitlabhome
                   hostPath:
                     path: /disk1/gitlab
             containers:
                 - name: gitlab
-                  hostname: gilab.internal.home
                   image: gitlab/gitlab-ee:latest
                   tty: true
                   stdin: true
