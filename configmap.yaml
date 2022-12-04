@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gitlab-rb
+data:
+  gitlab.rb: |
+    registry_external_url 'https://gitlab:9445'
+    nginx['ssl_certificate'] = "/etc/gitlab/ssl/gitlab.local.p.crt"
+    nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/gitlab.local.p.key"
+    registry_nginx['ssl_certificate'] = "/etc/gitlab/ssl/gitlab.local.p.crt"
+    registry_nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/gitlab.local.p.key"

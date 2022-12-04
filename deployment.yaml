@@ -18,19 +18,23 @@ spec:
             volumes:
                 - name: gitlabhome
                   hostPath:
-                    path: /disk1/gitlab
+                    path: /disk1/gitlab/cert
+                - name: gitlab-rb
+                  configMap:
+                    name: gitlab-rb
             containers:
                 - name: gitlab
                   image: gitlab/gitlab-ee:latest
                   tty: true
                   stdin: true
-                  env:
-                    - name: GITLAB_HOME
-                      value: /srv/gitlab
                   volumeMounts:
-                    - mountPath: /srv/gitlab
+                    - mountPath: /etc/gitlab/ssl
                       name: gitlabhome
-                  port:
+                    - name: gitlab-rb
+                      mountPath: "/srv/gitlab/config/gitlab.rb"
+                      subPath: gitlab.rb
+                      readOnly: true
+                  ports:
                      - containerPort: 80
                      - containerPort: 22
                      - containerPort: 443

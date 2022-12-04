@@ -4,3 +4,5 @@ namespace: devops
 resources:
   - deployment.yaml
   - service.yaml
+  - namespace.yaml
+  - configmap.yaml
