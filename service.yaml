@@ -6,7 +6,7 @@ metadata:
 spec:
   type: LoadBalancer
   selector:
-    app: DevOps
+    app: gitlab
   ports:
     - name: "https"
       protocol: TCP

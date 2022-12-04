@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-    name: DevOps
+    name: gitlab
     labels:
-      app: DevOps
+      app: gitlab
 spec:
     replicas: 1
     selector:
         matchLabels:
-            app: DevOps
+            app: gitlab
     template:
         metadata:
             labels:
-                app: DevOps
+                app: gitlab
         spec:
             hostname: gitlab.internal.home
             volumes:
