@@ -14,7 +14,7 @@ spec:
             labels:
                 app: gitlab
         spec:
-            hostname: gitlab.internal.home
+            hostname: gitlab
             volumes:
                 - name: gitlabhome
                   hostPath:
