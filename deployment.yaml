@@ -1,89 +1,107 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-    name: gitlab
-    labels:
-      app: gitlab
+  name: gitlab
+  labels:
+    app: gitlab
 spec:
-    replicas: 1
-    selector:
-        matchLabels:
-            app: gitlab
-    template:
-        metadata:
-            labels:
-                app: gitlab
-        spec:
-            hostname: gitlab
-            volumes:
-                - name: gitlabcert
-                  hostPath:
-                    path: /disk1/gitlab/cert
-                - name: gitlabhome
-                  hostPath:
-                    path: /disk1/gitlab/
-                - name: gitlabopt
-                  hostPath:
-                    path: /disk1/gitlab/opt
-                - name: gitlab-rb
-                  configMap:
-                    name: gitlab-rb
-                    items:
-                      - key: gitlab.rb
-                        path: gitlab.rb
-                - name: gitlab-ssl-script
-                  configMap:
-                    name: gitlab-ssl-script
-                    defaultMode: 0744
-                    items:
-                      - key: ssl.sh
-                        path: ssl.sh
-            initContainers:
-              - name: openssl
-                image: alpine/openssl
-                volumeMounts:
-                  - mountPath: /cert
-                    name: gitlabcert
-                  - mountPath: /ssl.sh
-                    name: gitlab-ssl-script
-                    subPath: ssl.sh
-                command:
-                  - sh
-                  - /ssl.sh
-            containers:
-                - name: gitlab
-                  image: gitlab/gitlab-ee:latest
-                  tty: true
-                  stdin: true
-                  env:
-                    - name: GITLAB_HOME
-                      value: /srv/gitlab
-                    - name: GITLAB_OMNIBUS_CONFIG
-                      valueFrom:
-                        configMapKeyRef:
-                          name: gitlab-rb
-                          key: gitlab.rb
-                  readinessProbe:
-                    tcpSocket:
-                      port: 443
-                    initialDelaySeconds: 60
-                    periodSeconds: 3
-                  livenessProbe:
-                    tcpSocket:
-                      port: 443
-                    initialDelaySeconds: 120
-                    periodSeconds: 3
-                  volumeMounts:
-                    - mountPath: /etc/gitlab/cert
-                      name: gitlabcert
-                    - mountPath: /srv/gitlab/
-                      name: gitlabhome
-                    - mountPath: /etc/gitlab/gitlab.rb
-                      name: gitlab-rb
-                      subPath: gitlab.rb
-                    - mountPath: /etc/gitlab/cert/ssl.sh
-                      name: gitlab-ssl-script
-                      subPath: ssl.sh
-                  ports:
-                     - containerPort: 22
-                     - containerPort: 443
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitlab
+  template:
+    metadata:
+      labels:
+        app: gitlab
+    spec:
+      hostname: gitlab
+      volumes:
+        - name: gitlabcert
+          hostPath:
+            path: /disk1/gitlab/cert
+        - name: gitlabhome
+          hostPath:
+            path: /disk1/gitlab/
+        - name: gitlabopt
+          hostPath:
+            path: /disk1/gitlab/opt
+        - name: docker-sock
+          hostPath:
+            path: /var/run/docker.sock
+        - name: runner-config
+          hostPath:
+            path: /disk1/gitlab/runner
+        - name: gitlab-rb
+          configMap:
+            name: gitlab-rb
+            items:
+              - key: gitlab.rb
+                path: gitlab.rb
+        - name: gitlab-ssl-script
+          configMap:
+            name: gitlab-ssl-script
+            defaultMode: 0744
+            items:
+              - key: ssl.sh
+                path: ssl.sh
+      initContainers:
+        - name: openssl
+          image: alpine/openssl
+          volumeMounts:
+            - mountPath: /cert
+              name: gitlabcert
+            - mountPath: /ssl.sh
+              name: gitlab-ssl-script
+              subPath: ssl.sh
+          command:
+            - sh
+            - /ssl.sh
+      containers:
+        - name: gitlab
+          image: gitlab/gitlab-ee:latest
+          tty: true
+          stdin: true
+          env:
+            - name: GITLAB_HOME
+              value: /srv/gitlab
+            - name: GITLAB_OMNIBUS_CONFIG
+              valueFrom:
+                configMapKeyRef:
+                  name: gitlab-rb
+                  key: gitlab.rb
+          readinessProbe:
+            tcpSocket:
+              port: 443
+            initialDelaySeconds: 60
+            periodSeconds: 3
+          livenessProbe:
+            tcpSocket:
+              port: 443
+            initialDelaySeconds: 120
+            periodSeconds: 3
+          volumeMounts:
+            - mountPath: /etc/gitlab/cert
+              name: gitlabcert
+            - mountPath: /srv/gitlab/
+              name: gitlabhome
+            - mountPath: /etc/gitlab/gitlab.rb
+              name: gitlab-rb
+              subPath: gitlab.rb
+            - mountPath: /etc/gitlab/cert/ssl.sh
+              name: gitlab-ssl-script
+              subPath: ssl.sh
+          ports:
+            - containerPort: 22
+            - containerPort: 443
+
+        - name: gitlab-runner
+          image: gitlab/gitlab-runner:latest
+          tty: true
+          stdin: true
+          volumeMounts:
+            - mountPath: /etc/gitlab-runner
+              name: runner-config
+            - mountPath: /var/run/docker.sock
+              name: docker-sock
+            - mountPath: /etc/gitlab-runner/cert
+              name: gitlabcert

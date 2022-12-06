@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitlab-runners
+  labels:
+    app: gitlab-runners
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: gitlab-runners
+  template:
+    metadata:
+      labels:
+        app: gitlab-runners
+    spec:
+      hostname: gitlab-runners
+      volumes:
+        - name: gitlabcert
+          hostPath:
+            path: /disk1/gitlab/cert
+        - name: gitlabhome
+          hostPath:
+            path: /disk1/gitlab/
+        - name: gitlabopt
+          hostPath:
+            path: /disk1/gitlab/opt
+        - name: docker-sock
+          hostPath:
+            path: /var/run/docker.sock
+        - name: runner-config
+          hostPath:
+            path: /disk1/gitlab/runner
+      containers:
+        - name: gitlab-runner
+          image: gitlab/gitlab-runner:latest
+          tty: true
+          stdin: true
+          volumeMounts:
+            - mountPath: /etc/gitlab-runner
+              name: runner-config
+            - mountPath: /var/run/docker.sock
+              name: docker-sock
+            - mountPath: /etc/gitlab-runner/cert
+              name: gitlabcert
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gitlab-http
+spec:
+  type: ClusterIP
+  selector:
+    app: gitlab
+  ports:
+    - name: "http"
+      port: 80

@@ -19,6 +19,8 @@ data:
       'bantime' => 3600
     }
     gitlab_rails['backup_gitaly_backup_path'] = '/srv/gitlab/backup'
+    nginx['custom_gitlab_server_config'] = "listen 80;"
+    nginx['listen_https'] = true
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -36,7 +38,7 @@ data:
 
     openssl genrsa -out ca.key 2048
     openssl req -new -x509 -days 365 -key $KEY -subj "/C=CN/ST=GD/L=SZ/O=Acme, Inc./CN=Acme Root CA" -out $CRT
-
-    openssl req -newkey rsa:2048 -nodes -keyout $KEYS -subj "/C=CN/ST=GD/L=SZ/O=Acme, Inc./CN=gitlab" -out $CSR --addext "subjectAltName = DNS:gitlab"
+    #"/C=CN/ST=GD/L=SZ/O=Acme, Inc./CN=gitlab"
+    openssl req -newkey rsa:2048 -nodes -keyout $KEYS -subj "/C=CN/ST=GD/L=SZ/O=Acme, Inc." -out $CSR --addext "subjectAltName = DNS:gitlab"
 
     openssl x509 -req -days 365 -in $CSR -CA $CRT -CAkey $KEY -CAcreateserial -out $CRTS
