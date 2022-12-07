@@ -15,6 +15,10 @@ spec:
         app: gitlab
     spec:
       hostname: gitlab
+      hostAliases:
+        - ip: 127.0.0.1
+          hostnames:
+            - gitlab
       volumes:
         - name: gitlabcert
           hostPath:
@@ -24,6 +28,14 @@ spec:
           hostPath:
             type: DirectoryOrCreate
             path: /disk1/gitlab/gitlab
+        - name: gitlabconf
+          hostPath:
+            type: DirectoryOrCreate
+            path: /disk1/gitlab/gitlab-conf
+        - name: gitlablog
+          hostPath:
+            type: DirectoryOrCreate
+            path: /disk1/gitlab/gitlab-log
         - name: docker-sock
           hostPath:
             path: /var/run/docker.sock
@@ -70,6 +82,10 @@ spec:
             initialDelaySeconds: 120
             periodSeconds: 3
           volumeMounts:
+            - mountPath: /etc/gitlab
+              name: gitlabconf
+            - mountPath: /var/log/gitlab
+              name: gitlablog
             - mountPath: /etc/gitlab/cert
               name: gitlabcert
             - mountPath: /var/opt/gitlab
@@ -83,12 +99,8 @@ spec:
 
         - name: gitlab-runner
           image: gitlab/gitlab-runner:latest
-          tty: true
-          stdin: true
           volumeMounts:
             - mountPath: /etc/gitlab-runner
               name: runner-config
             - mountPath: /var/run/docker.sock
               name: docker-sock
-            - mountPath: /etc/gitlab-runner/cert
-              name: gitlabcert

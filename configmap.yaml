@@ -15,12 +15,6 @@ data:
 
     nginx['ssl_certificate'] = "/etc/gitlab/cert/server.crt"
     nginx['ssl_certificate_key'] = "/etc/gitlab/cert/server.key"
-    gitlab_rails['rack_attack_git_basic_auth'] = {
-      'enabled' => true,
-      'maxretry' => 10,
-      'findtime' => 60,
-      'bantime' => 3600
-    }
     nginx['custom_gitlab_server_config'] = "listen 80;"
     nginx['listen_https'] = true
 ---
