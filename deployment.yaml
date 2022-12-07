@@ -18,19 +18,19 @@ spec:
       volumes:
         - name: gitlabcert
           hostPath:
+            type: DirectoryOrCreate
             path: /disk1/gitlab/cert
-        - name: gitlabhome
-          hostPath:
-            path: /disk1/gitlab/
         - name: gitlabopt
           hostPath:
-            path: /disk1/gitlab/opt
+            type: DirectoryOrCreate
+            path: /disk1/gitlab/gitlab
         - name: docker-sock
           hostPath:
             path: /var/run/docker.sock
         - name: runner-config
           hostPath:
             path: /disk1/gitlab/runner
+            type: DirectoryOrCreate
         - name: gitlab-rb
           configMap:
             name: gitlab-rb
@@ -59,16 +59,6 @@ spec:
       containers:
         - name: gitlab
           image: gitlab/gitlab-ee:latest
-          tty: true
-          stdin: true
-          env:
-            - name: GITLAB_HOME
-              value: /srv/gitlab
-            - name: GITLAB_OMNIBUS_CONFIG
-              valueFrom:
-                configMapKeyRef:
-                  name: gitlab-rb
-                  key: gitlab.rb
           readinessProbe:
             tcpSocket:
               port: 443
@@ -82,14 +72,11 @@ spec:
           volumeMounts:
             - mountPath: /etc/gitlab/cert
               name: gitlabcert
-            - mountPath: /srv/gitlab/
-              name: gitlabhome
+            - mountPath: /var/opt/gitlab
+              name: gitlabopt
             - mountPath: /etc/gitlab/gitlab.rb
               name: gitlab-rb
               subPath: gitlab.rb
-            - mountPath: /etc/gitlab/cert/ssl.sh
-              name: gitlab-ssl-script
-              subPath: ssl.sh
           ports:
             - containerPort: 22
             - containerPort: 443

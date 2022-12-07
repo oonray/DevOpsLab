@@ -5,20 +5,22 @@ metadata:
 data:
   gitlab.rb: |
     external_url "https://gitlab"
+
     letsencrypt['enable'] = false
-    nginx['ssl_certificate'] = "/srv/gitlab/cert/server.crt"
-    nginx['ssl_certificate_key'] = "/srv/gitlab/cert/server.key"
-    grafana['enable'] = false
     mattermost['enable'] = false
     prometheus['enable'] = false
-    git_data_dirs({ "default" => { "path" => "/srv/gitlab/data/" } })
+    grafana['enable'] = false
+
+    gitlab_rails['initial_root_password'] = 'iNHGh9m/lN8KpBMMcDVWzANGzkVuXFMhzz/Ixi2osVw='
+
+    nginx['ssl_certificate'] = "/etc/gitlab/cert/server.crt"
+    nginx['ssl_certificate_key'] = "/etc/gitlab/cert/server.key"
     gitlab_rails['rack_attack_git_basic_auth'] = {
       'enabled' => true,
       'maxretry' => 10,
       'findtime' => 60,
       'bantime' => 3600
     }
-    gitlab_rails['backup_gitaly_backup_path'] = '/srv/gitlab/backup'
     nginx['custom_gitlab_server_config'] = "listen 80;"
     nginx['listen_https'] = true
 ---
@@ -36,7 +38,7 @@ data:
     export CRTS="$CRTF/server.crt"
     export CSR="$CRTF/server.csr"
 
-    openssl genrsa -out ca.key 2048
+    openssl genrsa -out $KEY 2048
     openssl req -new -x509 -days 365 -key $KEY -subj "/C=CN/ST=GD/L=SZ/O=Acme, Inc./CN=Acme Root CA" -out $CRT
     #"/C=CN/ST=GD/L=SZ/O=Acme, Inc./CN=gitlab"
     openssl req -newkey rsa:2048 -nodes -keyout $KEYS -subj "/C=CN/ST=GD/L=SZ/O=Acme, Inc." -out $CSR --addext "subjectAltName = DNS:gitlab"
