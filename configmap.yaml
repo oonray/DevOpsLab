@@ -33,8 +33,7 @@ data:
     export CSR="$CRTF/gitlab.csr"
 
     openssl genrsa -out $KEY 2048
-    openssl req -new -x509 -days 365 -key $KEY -subj "/C=CN/ST=GD/L=SZ/O=Acme, Inc./CN=Acme Root CA" -out $CRT
+    openssl req -new -x509 -days 365 -key $KEY -subj '/CN=gitlab' -out $CRT
     #"/C=CN/ST=GD/L=SZ/O=Acme, Inc./CN=gitlab"
-    openssl req -newkey rsa:2048 -nodes -keyout $KEYS -subj "/C=CN/ST=GD/L=SZ/O=Acme, Inc." -out $CSR --addext "subjectAltName = DNS:gitlab"
-
+    openssl req -newkey rsa:2048 -nodes -keyout $KEYS -subj '/CN=gitlab' -out $CSR --addext "subjectAltName = DNS:gitlab"
     openssl x509 -req -days 365 -in $CSR -CA $CRT -CAkey $KEY -CAcreateserial -out $CRTS

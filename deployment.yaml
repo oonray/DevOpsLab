@@ -104,5 +104,5 @@ spec:
               name: runner-config
             - mountPath: /var/run/docker.sock
               name: docker-sock
-            - mountPath: /etc/gitlab-runner/cert
-              name: gitlabcert
+            #- mountPath: /etc/gitlab-runner/cert
+            #  name: gitlabcert

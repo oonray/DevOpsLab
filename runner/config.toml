@@ -14,15 +14,12 @@ shutdown_timeout = 0
   token_expires_at = 0001-01-01T00:00:00Z
   executor = "docker"
   clone_url = "https://gitlab:9443"
-  pre_build_script = """
-  apt-get update -y > /dev/null
-  apt-get install -y ca-certificates > /dev/null
-  
-  echo "10.43.202.205   gitlab" >> /etc/hosts
-
-  cp /etc/gitlab-runner/certs/ca.crt /usr/local/share/ca-certificates/ca.crt
-  update-ca-certificates --fresh > /dev/null
-  """
+  pre_clone_script = '''
+  echo "192.168.1.10 gitlab" >> /etc/hosts
+  cp /cert/ca.crt /etc/ssl/certs
+  update-ca-certificates
+  git config --global http.sslVerify false
+  '''
 
   [runners.custom_build_dir]
   [runners.cache]
@@ -37,5 +34,5 @@ shutdown_timeout = 0
     disable_entrypoint_overwrite = false
     oom_kill_disable = false
     disable_cache = false
-    volumes = ["/cache", "/disk1/gitlab/cert/ca.crt:/etc/gitlab-runner/certs/ca.crt:ro"]
+    volumes = ["/cache","/disk1/gitlab/cert:/cert"]
     shm_size = 0
