@@ -68,6 +68,7 @@ spec:
           command:
             - sh
             - /ssl.sh
+            - gitlab
       containers:
         - name: gitlab
           image: gitlab/gitlab-ee:latest
@@ -97,7 +98,7 @@ spec:
             - containerPort: 22
             - containerPort: 443
 
-        - name: gitlab-runner
+        - name: runner
           image: gitlab/gitlab-runner:latest
           volumeMounts:
             - mountPath: /etc/gitlab-runner

@@ -27,13 +27,54 @@ data:
     set -x
     export CRTF="/cert"
     export KEY="$CRTF/ca.key"
-    export KEYS="$CRTF/gitlab.key"
     export CRT="$CRTF/ca.crt"
-    export CRTS="$CRTF/gitlab.crt"
-    export CSR="$CRTF/gitlab.csr"
 
-    openssl genrsa -out $KEY 2048
-    openssl req -new -x509 -days 365 -key $KEY -subj '/CN=gitlab' -out $CRT
+    export KEY_GIT="$CRTF/gitlab.key"
+    export CRTS_GIT="$CRTF/gitlab.crt"
+    export CSR_GIT="$CRTF/gitlab.csr"
+
+    export KEY_GO="$CRTF/gocd.key"
+    export CRTS_GO="$CRTF/gocd.crt"
+    export CSR_GO="$CRTF/gocd.csr"
+
+    openssl genrsa -out $KEY 4096
+
+    if [ "$1" = 'gitlab' ]; then
     #"/C=CN/ST=GD/L=SZ/O=Acme, Inc./CN=gitlab"
-    openssl req -newkey rsa:2048 -nodes -keyout $KEYS -subj '/CN=gitlab' -out $CSR --addext "subjectAltName = DNS:gitlab"
-    openssl x509 -req -days 365 -in $CSR -CA $CRT -CAkey $KEY -CAcreateserial -out $CRTS
+    openssl req -newkey rsa:2048 -nodes -keyout $KEY_GIT -subj '/CN=gitlab' -out $CSR_GIT --addext "subjectAltName = DNS:gitlab"
+
+    openssl x509 -req -days 365 -in $CSR_GIT -CA $CRT -CAkey $KEY -CAcreateserial -out $CRTS_GIT
+    fi
+
+    if [ "$1" = 'gocd' ]; then
+    openssl req -newkey rsa:2048 -nodes -keyout $KEY_GO -subj '/CN=gocd' -out $CSR_GO --addext "subjectAltName = DNS:gocd"
+
+    openssl x509 -req -days 365 -in $CSR_GO -CA $CRT -CAkey $KEY -CAcreateserial -out $CRTS_GO
+    fi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  nginx.conf: |
+    user nginx;
+    worker_processes  3;
+    error_log  /var/log/nginx/error.log;
+    events {
+      worker_connections  10240;
+    }
+
+    http{
+      server {
+        listen 443 ssl;
+        server_name gocd;
+        ssl_certificate     /cert/gocd.crt;
+        ssl_certificate_key /cert/gocd.key;
+        ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
+        ssl_ciphers         HIGH:!aNULL:!MD5;
+        location ~ .* {
+          proxy_pass http://127.0.0.1:8153;
+        }
+      }
+    }
