@@ -14,11 +14,11 @@ spec:
       labels:
         app: gitlab
     spec:
-      hostname: gitlab
       hostAliases:
         - ip: 127.0.0.1
           hostnames:
             - gitlab
+            - gocd
       volumes:
         - name: gitlabcert
           hostPath:
@@ -56,8 +56,34 @@ spec:
             items:
               - key: ssl.sh
                 path: ssl.sh
+        - name: gocd
+          hostPath:
+            type: DirectoryOrCreate
+            path: /disk1/gocd/
+        - name: gocdcert
+          hostPath:
+            type: DirectoryOrCreate
+            path: /disk1/gitlab/cert
+        - name: nginx-config
+          configMap:
+            name: nginx-config
+            items:
+              - key: nginx.conf
+                path: nginx.conf
       initContainers:
-        - name: openssl
+        #- name: openssl-ca
+        #  image: alpine/openssl
+        #  volumeMounts:
+        #    - mountPath: /cert
+        #      name: gitlabcert
+        #    - mountPath: /ssl.sh
+        #      name: gitlab-ssl-script
+        #      subPath: ssl.sh
+        #  command:
+        #    - sh
+        #    - /ssl.sh
+        #    - CA
+        - name: openssl-gitlab
           image: alpine/openssl
           volumeMounts:
             - mountPath: /cert
@@ -69,19 +95,31 @@ spec:
             - sh
             - /ssl.sh
             - gitlab
+        - name: openssl-gocd
+          image: alpine/openssl
+          volumeMounts:
+            - mountPath: /cert
+              name: gocdcert
+            - mountPath: /ssl.sh
+              name: gitlab-ssl-script
+              subPath: ssl.sh
+          command:
+            - sh
+            - /ssl.sh
+            - gocd
+        - name: directory
+          image: debian:latest
+          volumeMounts:
+            - mountPath: /godata
+              name: gocd
+          command:
+            - chown
+            - "-R"
+            - "1000:1000"
+            - "/godata"
       containers:
         - name: gitlab
           image: gitlab/gitlab-ee:latest
-          readinessProbe:
-            tcpSocket:
-              port: 443
-            initialDelaySeconds: 60
-            periodSeconds: 3
-          livenessProbe:
-            tcpSocket:
-              port: 443
-            initialDelaySeconds: 120
-            periodSeconds: 3
           volumeMounts:
             - mountPath: /etc/gitlab
               name: gitlabconf
@@ -96,7 +134,7 @@ spec:
               subPath: gitlab.rb
           ports:
             - containerPort: 22
-            - containerPort: 443
+            - containerPort: 8181
 
         - name: runner
           image: gitlab/gitlab-runner:latest
@@ -105,5 +143,25 @@ spec:
               name: runner-config
             - mountPath: /var/run/docker.sock
               name: docker-sock
-            #- mountPath: /etc/gitlab-runner/cert
-            #  name: gitlabcert
+
+        - name: nginx
+          image: nginx
+          ports:
+            - containerPort: 443
+          volumeMounts:
+            - mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              name: nginx-config
+            - mountPath: /cert
+              name: gitlabcert
+
+        - name: gocd
+          image: gocd/gocd-server:v22.3.0
+          volumeMounts:
+            - mountPath: /godata
+              name: gocd
+          env:
+            - name: GOCD_PLUGIN_INSTALL_a-plugin
+              value: https://github.com/gocd-contrib/gitlab-oauth-authorization-plugin/releases/download/v2.1.0-145/gitlab-oauth-authorization-plugin-2.1.0-145.jar
+          ports:
+            - containerPort: 8153

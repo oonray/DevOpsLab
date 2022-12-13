@@ -4,19 +4,17 @@ metadata:
   name: gitlab-rb
 data:
   gitlab.rb: |
-    external_url "https://gitlab"
 
     letsencrypt['enable'] = false
     mattermost['enable'] = false
     prometheus['enable'] = false
     grafana['enable'] = false
+    nginx['enable'] = false
 
     gitlab_rails['initial_root_password'] = 'iNHGh9m/lN8KpBMMcDVWzANGzkVuXFMhzz/Ixi2osVw='
 
-    nginx['ssl_certificate'] = "/etc/gitlab/cert/gitlab.crt"
-    nginx['ssl_certificate_key'] = "/etc/gitlab/cert/gitlab.key"
-    nginx['custom_gitlab_server_config'] = "listen 80;"
-    nginx['listen_https'] = true
+    gitlab_workhorse['listen_network'] = "tcp"
+    gitlab_workhorse['listen_addr'] = "127.0.0.1:8181"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -37,7 +35,10 @@ data:
     export CRTS_GO="$CRTF/gocd.crt"
     export CSR_GO="$CRTF/gocd.csr"
 
-    openssl genrsa -out $KEY 4096
+    if [ "$1" = 'CA' ]; then
+    openssl genrsa -out ca.key 4096
+    openssl req -new -x509 -days 365 -key $KEY -subj "/C=CN/ST=GD/L=SZ/O=Acme, Inc./CN=Acme Root CA" -out $CRT
+    fi;
 
     if [ "$1" = 'gitlab' ]; then
     #"/C=CN/ST=GD/L=SZ/O=Acme, Inc./CN=gitlab"
@@ -75,6 +76,18 @@ data:
         ssl_ciphers         HIGH:!aNULL:!MD5;
         location ~ .* {
           proxy_pass http://127.0.0.1:8153;
+        }
+      }
+
+      server {
+        listen 443 ssl default_server;
+        server_name gitlab;
+        ssl_certificate     /cert/gitlab.crt;
+        ssl_certificate_key /cert/gitlab.key;
+        ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
+        ssl_ciphers         HIGH:!aNULL:!MD5;
+        location ~ .* {
+          proxy_pass http://127.0.0.1:8181;
         }
       }
     }
