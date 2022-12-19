@@ -22,4 +22,4 @@ spec:
             - name: AGENT_BOOTSTRAPPER_ARGS
               value: "-sslVerificationMode NONE"
             - name: GO_SERVER_URL
-              value: https://gocd.dev.svc.cluster.local
+              value: https://gocd.dev.svc.cluster.local/go
