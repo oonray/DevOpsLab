@@ -43,6 +43,10 @@ spec:
           hostPath:
             path: /disk1/gitlab/runner
             type: DirectoryOrCreate
+        - name: gocdssh
+          hostPath:
+            type: DirectoryOrCreate
+            path: /disk1/gocd/ssh
         - name: gitlab-rb
           configMap:
             name: gitlab-rb
@@ -83,6 +87,22 @@ spec:
         #    - sh
         #    - /ssl.sh
         #    - CA
+        - name: ssh-keygen
+          image: debian:latest
+          volumeMounts:
+            - mountPath: /ssh
+              name: gocdssh
+          command:
+            - ssh-keygen
+            - "-b"
+            - "4096"
+            - "-t"
+            - rsa
+            - "-f"
+            - "/ssh/id_rsa"
+            - "-q"
+            - "-N"
+            - ""
         - name: openssl-gitlab
           image: alpine/openssl
           volumeMounts:
@@ -160,6 +180,8 @@ spec:
           volumeMounts:
             - mountPath: /godata
               name: gocd
+            - mountPath: /home/go/.ssh
+              name: gocdssh
             - mountPath: /cert
               name: gitlabcert
           env:
