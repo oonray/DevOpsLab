@@ -160,8 +160,12 @@ spec:
           volumeMounts:
             - mountPath: /godata
               name: gocd
+            - mountPath: /cert
+              name: gitlabcert
           env:
             - name: GOCD_PLUGIN_INSTALL_a-plugin
               value: https://github.com/gocd-contrib/gitlab-oauth-authorization-plugin/releases/download/v2.1.0-145/gitlab-oauth-authorization-plugin-2.1.0-145.jar
+            - name: GOCD_PLUGIN_INSTALL_b-plugin
+              value: https://github.com/gocd-contrib/github-oauth-authorization-plugin/releases/download/v3.3.1-211/github-oauth-authorization-plugin-3.3.1-211.jar
           ports:
             - containerPort: 8153

@@ -5,3 +5,4 @@ resources:
   - gitlab.yaml
   - service.yaml
   - configmap.yaml
+  - gocdagent.yaml

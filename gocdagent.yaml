@@ -1,0 +1,24 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gocd-agent
+  labels:
+    app: gocd-agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gocd-agent
+  template:
+    metadata:
+      labels:
+        app: gocd-agent
+    spec:
+      - name: agent
+        image: gocd/gocd-agent-debian-11:v22.3.0
+        env:
+          - name: AGENT_BOOTSTRAPPER_ARGS
+            value: "-sslVerificationMode NONE"
+          - name: GO_SERVER_URL
+            value: https://gocd.dev.svc.cluster.local

@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: gitlab-https
+  name: gitlab
 spec:
   type: ClusterIP #ClusterIP
   selector:
@@ -12,3 +12,15 @@ spec:
       port: 443
     - name: "ssh"
       port: 22
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gocd
+spec:
+  type: ClusterIP #ClusterIP
+  selector:
+    app: gitlab
+  ports:
+    - name: "nignx"
+      port: 443
