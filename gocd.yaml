@@ -1,0 +1,114 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gocd
+  labels:
+    app: gocd
+spec:
+  hostname: gocd
+  volumes:
+    - name: gitlabcert
+      hostPath:
+        type: DirectoryOrCreate
+        path: /disk1/gitlab/cert
+    - name: gitlabopt
+      hostPath:
+        type: DirectoryOrCreate
+        path: /disk1/gitlab/gitlab
+    - name: gitlabconf
+      hostPath:
+        type: DirectoryOrCreate
+        path: /disk1/gitlab/gitlab-conf
+    - name: gitlablog
+      hostPath:
+        type: DirectoryOrCreate
+        path: /disk1/gitlab/gitlab-log
+    - name: docker-sock
+      hostPath:
+        path: /var/run/docker.sock
+    - name: runner-config
+      hostPath:
+        path: /disk1/gitlab/runner
+        type: DirectoryOrCreate
+    - name: gocdssh
+      hostPath:
+        type: DirectoryOrCreate
+        path: /disk1/gocd/ssh
+    - name: gitlab-rb
+      configMap:
+        name: gitlab-rb
+        items:
+          - key: gitlab.rb
+            path: gitlab.rb
+    - name: gitlab-ssl-script
+      configMap:
+        name: gitlab-ssl-script
+        defaultMode: 0744
+        items:
+          - key: ssl.sh
+            path: ssl.sh
+    - name: gocd
+      hostPath:
+        type: DirectoryOrCreate
+        path: /disk1/gocd/
+    - name: gocdcert
+      hostPath:
+        type: DirectoryOrCreate
+        path: /disk1/gitlab/cert
+    - name: nginx-config
+      configMap:
+        name: nginx-config
+        items:
+          - key: nginx.conf
+            path: nginx.conf
+  initContainers:
+    # - name: ssh-keygen
+    #   image: debian:latest
+    #   volumeMounts:
+    #     - mountPath: /ssh
+    #       name: gocdssh
+    #   command:
+    #     - ssh-keygen
+    #     - "-b"
+    #     - "4096"
+    #     - "-t"
+    #     - rsa
+    #     - "-f"
+    #     - "/ssh/id_rsa"
+    #     - "-q"
+    #     - "-N"
+    #     - ""
+    - name: directory
+      image: debian:latest
+      volumeMounts:
+        - mountPath: /godata
+          name: gocd
+      command:
+        - chown
+        - "-R"
+        - "1000:1000"
+        - "/godata"
+  containers:
+    - name: gocd
+      image: gocd/gocd-server:v22.3.0
+      volumeMounts:
+        - mountPath: /godata
+          name: gocd
+        - mountPath: /home/go/.ssh
+          name: gocdssh
+        - mountPath: /cert
+          name: gitlabcert
+      env:
+        - name: GOCD_PLUGIN_INSTALL_a-plugin
+          value: https://github.com/gocd-contrib/gitlab-oauth-authorization-plugin/releases/download/v2.1.0-145/gitlab-oauth-authorization-plugin-2.1.0-145.jar
+        - name: GOCD_PLUGIN_INSTALL_b-plugin
+          value: https://github.com/gocd-contrib/github-oauth-authorization-plugin/releases/download/v3.3.1-211/github-oauth-authorization-plugin-3.3.1-211.jar
+      ports:
+        - containerPort: 8153
+    - name: agent
+      image: gocd/gocd-agent-debian-11:v22.3.0
+      env:
+        - name: AGENT_BOOTSTRAPPER_ARGS
+          value: "-sslVerificationMode NONE"
+        - name: GO_SERVER_URL
+          value: https://gocd.dev.svc.cluster.local/go

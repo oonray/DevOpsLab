@@ -1,12 +1,10 @@
-kind: Pod
 apiVersion: v1
+kind: Pod
 metadata:
-  name: gitlab
+  name: nginx
   labels:
-    app: gitlab
-    name: server
+    app: nginx
 spec:
-  hostname: gitlab
   volumes:
     - name: gitlabcert
       hostPath:
@@ -68,29 +66,51 @@ spec:
         items:
           - key: cruise-config.xml
             path: cruise-config.xml
-  containers:
-    - name: gitlab
-      image: gitlab/gitlab-ee:latest
+  initContainers:
+    #- name: openssl-ca
+    #  image: alpine/openssl
+    #  volumeMounts:
+    #    - mountPath: /cert
+    #      name: gitlabcert
+    #    - mountPath: /ssl.sh
+    #      name: gitlab-ssl-script
+    #      subPath: ssl.sh
+    #  command:
+    #    - sh
+    #    - /ssl.sh
+    #    - CA
+    - name: openssl-gitlab
+      image: alpine/openssl
       volumeMounts:
-        - mountPath: /etc/gitlab
-          name: gitlabconf
-        - mountPath: /var/log/gitlab
-          name: gitlablog
-        - mountPath: /etc/gitlab/cert
+        - mountPath: /cert
           name: gitlabcert
-        - mountPath: /var/opt/gitlab
-          name: gitlabopt
-        - mountPath: /etc/gitlab/gitlab.rb
-          name: gitlab-rb
-          subPath: gitlab.rb
-      ports:
-        - containerPort: 22
-        - containerPort: 8181
-
-    - name: runner
-      image: gitlab/gitlab-runner:latest
+        - mountPath: /ssl.sh
+          name: gitlab-ssl-script
+          subPath: ssl.sh
+      command:
+        - sh
+        - /ssl.sh
+        - gitlab
+    - name: openssl-gocd
+      image: alpine/openssl
       volumeMounts:
-        - mountPath: /etc/gitlab-runner
-          name: runner-config
-        - mountPath: /var/run/docker.sock
-          name: docker-sock
+        - mountPath: /cert
+          name: gocdcert
+        - mountPath: /ssl.sh
+          name: gitlab-ssl-script
+          subPath: ssl.sh
+      command:
+        - sh
+        - /ssl.sh
+        - gocd
+  containers:
+    - name: nginx
+      image: nginx
+      ports:
+        - containerPort: 443
+      volumeMounts:
+        - mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+          name: nginx-config
+        - mountPath: /cert
+          name: gitlabcert

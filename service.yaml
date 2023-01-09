@@ -5,13 +5,12 @@ metadata:
   name: gitlab
 spec:
   type: ClusterIP #ClusterIP
+  clusterIP: None
   selector:
     app: gitlab
   ports:
-    - name: "nignx"
-      port: 443
-    - name: "ssh"
-      port: 22
+    - name: gitlab
+      port: 8181
 ---
 apiVersion: v1
 kind: Service
@@ -19,8 +18,35 @@ metadata:
   name: gocd
 spec:
   type: ClusterIP #ClusterIP
+  clusterIP: None
+  selector:
+    app: gocd
+  ports:
+    - name: gocd
+      port: 8153
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+spec:
+  type: ClusterIP #ClusterIP
+  selector:
+    app: nginx
+  ports:
+    - name: nignx
+      port: 443
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gitlab-ssh
+spec:
+  type: ClusterIP
   selector:
     app: gitlab
   ports:
-    - name: "nignx"
-      port: 443
+    - name: "ssh"
+      protocol: TCP
+      port: 9022
+      targetPort: 22

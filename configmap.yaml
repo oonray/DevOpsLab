@@ -4,7 +4,6 @@ metadata:
   name: gitlab-rb
 data:
   gitlab.rb: |
-
     letsencrypt['enable'] = false
     mattermost['enable'] = false
     prometheus['enable'] = false
@@ -14,7 +13,7 @@ data:
     gitlab_rails['initial_root_password'] = 'iNHGh9m/lN8KpBMMcDVWzANGzkVuXFMhzz/Ixi2osVw='
 
     gitlab_workhorse['listen_network'] = "tcp"
-    gitlab_workhorse['listen_addr'] = "127.0.0.1:8181"
+    gitlab_workhorse['listen_addr'] = "0.0.0.0:8181"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -67,17 +66,17 @@ data:
     }
 
     http{
-      server {
-        listen 443 ssl;
-        server_name gocd gocd.dev.svc.cluster.local;
-        ssl_certificate     /cert/gocd.crt;
-        ssl_certificate_key /cert/gocd.key;
-        ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
-        ssl_ciphers         HIGH:!aNULL:!MD5;
-        location ~ .* {
-          proxy_pass http://127.0.0.1:8153;
-        }
-      }
+       #server {
+       #  listen 443 ssl;
+       #  server_name gocd gocd.dev.svc.cluster.local;
+       #  ssl_certificate     /cert/gocd.crt;
+       #  ssl_certificate_key /cert/gocd.key;
+       #  ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
+       #  ssl_ciphers         HIGH:!aNULL:!MD5;
+       #  location ~ .* {
+       #    proxy_pass http://gocd.dev.svc.cluster.local:8153;
+       #  }
+       #}
 
       server {
         listen 443 ssl default_server;
@@ -87,7 +86,7 @@ data:
         ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
         ssl_ciphers         HIGH:!aNULL:!MD5;
         location ~ .* {
-          proxy_pass http://127.0.0.1:8181;
+          proxy_pass http://gitlab.dev.svc.cluster.local:8181;
         }
       }
     }

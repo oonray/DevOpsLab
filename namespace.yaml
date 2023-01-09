@@ -1,6 +1,6 @@
 kind: Namespace
 apiVersion: v1
 metadata:
-  name: devops
+  name: dev
   labels:
-        name: devops
+    name: dev
