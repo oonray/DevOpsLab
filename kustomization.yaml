@@ -7,4 +7,4 @@ resources:
   - service.yaml
   #  - gocd.yaml
   - gitlab.yaml
-  - https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+  #- https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
