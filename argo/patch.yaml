@@ -1,0 +1,76 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argocd-dex-server
+spec:
+  template:
+    spec:
+      containers:
+        - name: dex
+          env:
+            - name: ARGO_WORKFLOWS_SSO_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: argo-workflows-sso
+                  key: client-secret
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+data:
+  # Kustomize sees the value of dex.config as a single string instead of yaml. It will not merge
+  # Dex settings, but instead it will replace the entire configuration with the settings below,
+  # so add these to the existing config instead of setting them in a separate file
+  dex.config: |
+    # Setting staticClients allows Argo Workflows to use Argo CD's Dex installation for authentication
+    staticClients:
+      - id: argo-workflows-sso
+        name: Argo Workflow
+        redirectURIs:
+          - https://argo-server.argocd.svc.cluster.local:2746/oauth2/callback
+        secretEnv: ARGO_WORKFLOWS_SSO_CLIENT_SECRET
+
+
+#In Argo Workflows add --auth-mode=sso argument to argo-server deployment.
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argo-server
+spec:
+  template:
+    spec:
+      containers:
+        - name: argo-server
+          args:
+            - server
+            - --auth-mode=sso
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: workflow-controller-configmap
+data:
+  # SSO Configuration for the Argo server.
+  # You must also start argo server with `--auth-mode sso`.
+  # https://argoproj.github.io/argo-workflows/argo-server-auth-mode/
+  sso: |
+    # This is the root URL of the OIDC provider (required).
+    issuer: https://argocd-server.argocd.svc.cluster.local/api/dex
+    # This is name of the secret and the key in it that contain OIDC client
+    # ID issued to the application by the provider (required).
+    clientId:
+      name: argo-workflows-sso
+      key: client-id
+    # This is name of the secret and the key in it that contain OIDC client
+    # secret issued to the application by the provider (required).
+    clientSecret:
+      name: argo-workflows-sso
+      key: client-secret
+    # This is the redirect URL supplied to the provider (required). It must
+    # be in the form <argo-server-root-url>/oauth2/callback. It must be
+    # browser-accessible.
+    redirectUrl: https://argo-server.argocd.svc.cluster.local/oauth2/callback
