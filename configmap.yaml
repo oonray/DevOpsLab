@@ -10,7 +10,7 @@ data:
     grafana['enable'] = false
     nginx['enable'] = false
 
-    gitlab_rails['initial_root_password'] = 'iNHGh9m/lN8KpBMMcDVWzANGzkVuXFMhzz/Ixi2osVw='
+    gitlab_rails['initial_root_password'] = ''
 
     gitlab_workhorse['listen_network'] = "tcp"
     gitlab_workhorse['listen_addr'] = "0.0.0.0:8181"
