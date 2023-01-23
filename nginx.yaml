@@ -67,18 +67,18 @@ spec:
           - key: cruise-config.xml
             path: cruise-config.xml
   initContainers:
-    #- name: openssl-ca
-    #  image: alpine/openssl
-    #  volumeMounts:
-    #    - mountPath: /cert
-    #      name: gitlabcert
-    #    - mountPath: /ssl.sh
-    #      name: gitlab-ssl-script
-    #      subPath: ssl.sh
-    #  command:
-    #    - sh
-    #    - /ssl.sh
-    #    - CA
+    - name: openssl-ca
+      image: alpine/openssl
+      volumeMounts:
+        - mountPath: /cert
+          name: gitlabcert
+        - mountPath: /ssl.sh
+          name: gitlab-ssl-script
+          subPath: ssl.sh
+      command:
+        - sh
+        - /ssl.sh
+        - CA
     - name: openssl-gitlab
       image: alpine/openssl
       volumeMounts:
