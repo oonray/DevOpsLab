@@ -91,18 +91,18 @@ spec:
         - sh
         - /ssl.sh
         - gitlab
-    - name: openssl-gocd
-      image: alpine/openssl
-      volumeMounts:
-        - mountPath: /cert
-          name: gocdcert
-        - mountPath: /ssl.sh
-          name: gitlab-ssl-script
-          subPath: ssl.sh
-      command:
-        - sh
-        - /ssl.sh
-        - gocd
+    #- name: openssl-gocd
+    #  image: alpine/openssl
+    #  volumeMounts:
+    #    - mountPath: /cert
+    #      name: gocdcert
+    #    - mountPath: /ssl.sh
+    #      name: gitlab-ssl-script
+    #      subPath: ssl.sh
+    #  command:
+    #    - sh
+    #    - /ssl.sh
+    #    - gocd
   containers:
     - name: nginx
       image: nginx
