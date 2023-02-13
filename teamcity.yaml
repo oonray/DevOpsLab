@@ -1,0 +1,27 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: teamcity
+  labels:
+    app: teamcity
+    name: server
+spec:
+  volumes:
+    - name: datadir
+      hostPath:
+        type: DirectoryOrCreate
+        path: /disk1/teamcity/data
+    - name: logs
+      hostPath:
+        type: DirectoryOrCreate
+        path: /disk1/teamcity/logs
+  containers:
+    - name: teamcity
+      image: jetbrains/teamcity-server
+      volumeMounts:
+        - mountPath: /data/teamcity_server/datadir
+          name: datadir
+        - mountPath: /opt/teamcity/logs
+          name: logs
+      ports:
+        - containerPort: 8111
