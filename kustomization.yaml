@@ -6,6 +6,7 @@ resources:
   - service.yaml
   - nginx.yaml
   - gitlab.yaml
+  - teamcity.yaml
   #  - gocd.yaml
   #- https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
   #- https://github.com/argoproj/argo-workflows/releases/download/v3.4.4/install.yaml
