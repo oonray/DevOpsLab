@@ -30,7 +30,7 @@ spec:
       image: jetbrains/teamcity-agent
       env:
         - name: SERVER_URL
-          value: "http://teamcity.dev.svc.cluster.local"
+          value: "http://teamcity.dev.svc.cluster.local:8111"
         - name: AGENT_NAME
           value: agent01
 
@@ -38,6 +38,6 @@ spec:
       image: jetbrains/teamcity-agent
       env:
         - name: SERVER_URL
-          value: "http://teamcity.dev.svc.cluster.local"
+          value: "http://teamcity.dev.svc.cluster.local:8111"
         - name: AGENT_NAME
           value: agent02
