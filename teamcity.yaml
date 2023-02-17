@@ -25,3 +25,19 @@ spec:
           name: logs
       ports:
         - containerPort: 8111
+
+    - name: agent01
+      image: jetbrains/teamcity-agent
+      env:
+        - name: SERVER_URL
+          value: "http://teamcity.dev.svc.cluster.local"
+        - name: AGENT_NAME
+          value: agent01
+
+    - name: agent02
+      image: jetbrains/teamcity-agent
+      env:
+        - name: SERVER_URL
+          value: "http://teamcity.dev.svc.cluster.local"
+        - name: AGENT_NAME
+          value: agent02
