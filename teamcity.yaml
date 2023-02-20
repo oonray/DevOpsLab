@@ -15,6 +15,9 @@ spec:
       hostPath:
         type: DirectoryOrCreate
         path: /disk1/teamcity/logs
+    - name: docker-sock
+      hostPath:
+        path: /var/run/docker.sock
   containers:
     - name: teamcity
       image: jetbrains/teamcity-server
@@ -28,16 +31,26 @@ spec:
 
     - name: agent01
       image: jetbrains/teamcity-agent
+      volumeMounts:
+        - mountPath: /var/run/docker.sock
+          name: docker-sock
       env:
         - name: SERVER_URL
           value: "http://teamcity.dev.svc.cluster.local:8111"
         - name: AGENT_NAME
           value: agent01
+        - name: DOCKER_IN_DOCKER
+          value: start
 
     - name: agent02
       image: jetbrains/teamcity-agent
+      volumeMounts:
+        - mountPath: /var/run/docker.sock
+          name: docker-sock
       env:
         - name: SERVER_URL
           value: "http://teamcity.dev.svc.cluster.local:8111"
         - name: AGENT_NAME
           value: agent02
+        - name: DOCKER_IN_DOCKER
+          value: start
