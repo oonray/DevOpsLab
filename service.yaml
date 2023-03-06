@@ -4,7 +4,7 @@ kind: Service
 metadata:
   name: gitlab
 spec:
-  type: ClusterIP #ClusterIP
+  type: LoadBalancer #ClusterIP
   clusterIP: None
   selector:
     app: gitlab
@@ -42,7 +42,7 @@ kind: Service
 metadata:
   name: gitlab-ssh
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: gitlab
   ports:

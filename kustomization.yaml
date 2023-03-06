@@ -10,3 +10,5 @@ resources:
   #  - gocd.yaml
   #- https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
   #- https://github.com/argoproj/argo-workflows/releases/download/v3.4.4/install.yaml
+  #-  https://raw.githubusercontent.com/keycloak/keycloak-quickstarts/latest/kubernetes-examples/keycloak.yaml
+
