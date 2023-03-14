@@ -4,6 +4,7 @@ namespace: argocd
 resources:
   #- https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
   - ingress.yaml
+  - serivce.yaml
   #- https://github.com/argoproj/argo-workflows/releases/download/v3.4.4/install.yaml
   #- https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install.yaml
   #- https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install-validating-webhook.yaml
